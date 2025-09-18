@@ -32,13 +32,7 @@ async function bootstrap() {
     }),
   );
 
-  // API versioning
-  app.enableVersioning({
-    type: VersioningType.URI,
-    defaultVersion: '1',
-  });
-
-  // Global prefix
+  // Global prefix (without versioning to avoid double prefixing)
   const apiPrefix = configService.get('API_PREFIX', 'api/v1');
   app.setGlobalPrefix(apiPrefix);
 

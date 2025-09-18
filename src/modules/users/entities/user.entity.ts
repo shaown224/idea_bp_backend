@@ -3,104 +3,137 @@ import {
   Column,
   Model,
   DataType,
+  PrimaryKey,
+  Default,
+  AllowNull,
+  Unique,
   CreatedAt,
   UpdatedAt,
-  DeletedAt,
-  BeforeCreate,
-  BeforeUpdate,
+  HasMany,
 } from 'sequelize-typescript';
-import * as bcrypt from 'bcryptjs';
+import { Property } from '../../properties/entities/property.entity';
+import { PointsTransaction } from '../../points-transactions/entities/points-transaction.entity';
+import { Contact } from '../../contacts/entities/contact.entity';
+import { Review } from '../../reviews/entities/review.entity';
+import { Payment } from '../../payments/entities/payment.entity';
+import { OtpCode } from '../../otp-codes/entities/otp-code.entity';
 
 @Table({
   tableName: 'users',
   timestamps: true,
-  paranoid: true,
+  underscored: true,
 })
 export class User extends Model<User> {
+  @PrimaryKey
+  @Default(DataType.UUIDV4)
   @Column({
-    type: DataType.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
+    type: DataType.UUID,
+    field: 'id',
   })
-  id: number;
+  id: string;
 
+  @AllowNull(false)
   @Column({
-    type: DataType.STRING,
-    allowNull: false,
-    unique: true,
+    type: DataType.STRING(150),
+    field: 'full_name',
+  })
+  fullName: string;
+
+  @AllowNull(false)
+  @Unique
+  @Column({
+    type: DataType.STRING(150),
+    field: 'email',
   })
   email: string;
 
+  @AllowNull(true)
+  @Unique
   @Column({
-    type: DataType.STRING,
-    allowNull: false,
+    type: DataType.STRING(30),
+    field: 'phone_number',
   })
-  firstName: string;
+  phoneNumber: string;
 
+  @AllowNull(true)
   @Column({
-    type: DataType.STRING,
-    allowNull: false,
+    type: DataType.TEXT,
+    field: 'profile_photo_url',
   })
-  lastName: string;
+  profilePhotoUrl: string;
 
+  @AllowNull(true)
   @Column({
-    type: DataType.STRING,
-    allowNull: false,
+    type: DataType.TEXT,
+    field: 'bio',
   })
-  password: string;
+  bio: string;
 
+  @AllowNull(false)
+  @Default(5)
   @Column({
-    type: DataType.STRING,
-    allowNull: true,
+    type: DataType.INTEGER,
+    field: 'points_balance',
   })
-  phone: string;
+  pointsBalance: number;
 
-  @Column({
-    type: DataType.ENUM('admin', 'user'),
-    defaultValue: 'user',
-  })
-  role: string;
-
+  @AllowNull(false)
+  @Default(false)
   @Column({
     type: DataType.BOOLEAN,
-    defaultValue: true,
+    field: 'phone_verified',
   })
-  isActive: boolean;
+  phoneVerified: boolean;
 
+  @AllowNull(true)
   @Column({
     type: DataType.DATE,
-    allowNull: true,
+    field: 'last_login_at',
   })
   lastLoginAt: Date;
 
   @CreatedAt
+  @Column({
+    type: DataType.DATE,
+    field: 'created_at',
+  })
   createdAt: Date;
 
   @UpdatedAt
+  @Column({
+    type: DataType.DATE,
+    field: 'updated_at',
+  })
   updatedAt: Date;
 
-  @DeletedAt
-  deletedAt: Date;
+  // Associations
+  @HasMany(() => Property, { foreignKey: 'ownerId', as: 'properties' })
+  properties: Property[];
 
-  // Hash password before creating or updating
-  @BeforeCreate
-  @BeforeUpdate
-  static async hashPassword(instance: User) {
-    if (instance.changed('password' as any)) {
-      const salt = await bcrypt.genSalt(10);
-      instance.password = await bcrypt.hash(instance.password, salt);
-    }
-  }
+  @HasMany(() => PointsTransaction, { foreignKey: 'userId', as: 'pointsTransactions' })
+  pointsTransactions: PointsTransaction[];
 
-  // Instance method to check password
-  async comparePassword(candidatePassword: string): Promise<boolean> {
-    return bcrypt.compare(candidatePassword, this.password);
-  }
+  @HasMany(() => Contact, { foreignKey: 'requesterId', as: 'contactRequests' })
+  contactRequests: Contact[];
 
-  // Convert to JSON and exclude password
+  @HasMany(() => Contact, { foreignKey: 'landlordId', as: 'contactsReceived' })
+  contactsReceived: Contact[];
+
+  @HasMany(() => Review, { foreignKey: 'reviewerId', as: 'reviewsGiven' })
+  reviewsGiven: Review[];
+
+  @HasMany(() => Review, { foreignKey: 'revieweeId', as: 'reviewsReceived' })
+  reviewsReceived: Review[];
+
+  @HasMany(() => Payment, { foreignKey: 'userId', as: 'payments' })
+  payments: Payment[];
+
+  @HasMany(() => OtpCode, { foreignKey: 'userId', as: 'otpCodes' })
+  otpCodes: OtpCode[];
+
+  // Convert to JSON
   toJSON() {
     const values = Object.assign({}, this.get() as any);
-    delete values.password;
     return values;
   }
 }

@@ -4,15 +4,23 @@ import { SequelizeModuleOptions } from '@nestjs/sequelize';
 export const databaseConfig = (
   configService: ConfigService,
 ): SequelizeModuleOptions => ({
-  dialect: configService.get('DB_DIALECT') as any,
-  host: configService.get('DB_HOST'),
-  port: configService.get('DB_PORT'),
-  username: configService.get('DB_USERNAME'),
-  password: configService.get('DB_PASSWORD'),
-  database: configService.get('DB_DATABASE'),
+  dialect: 'postgres',
+  host: configService.get('DB_HOST', 'localhost'),
+  port: parseInt(configService.get('DB_PORT', '5432')),
+  username: configService.get('DB_USERNAME', 'postgres'),
+  password: configService.get('DB_PASSWORD', 'password'),
+  database: configService.get('DB_DATABASE', 'idea_bp_db'),
   autoLoadModels: true,
-  synchronize: configService.get('NODE_ENV') === 'development',
+  synchronize: false, // Use migrations instead of sync
   logging: configService.get('NODE_ENV') === 'development' ? console.log : false,
+  dialectOptions: {
+    useUTC: false,
+    ssl: configService.get('NODE_ENV') === 'production' ? {
+      require: true,
+      rejectUnauthorized: false,
+    } : false,
+  },
+  timezone: '+00:00',
   pool: {
     max: 10,
     min: 0,
@@ -22,7 +30,6 @@ export const databaseConfig = (
   define: {
     timestamps: true,
     underscored: true,
-    paranoid: true, // Enable soft deletes
     freezeTableName: true,
   },
 });

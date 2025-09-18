@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength, IsOptional, IsPhoneNumber } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MinLength, IsOptional, IsPhoneNumber, IsBoolean, IsNumber } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserDto {
@@ -7,25 +7,25 @@ export class CreateUserDto {
   @IsNotEmpty()
   email: string;
 
-  @ApiProperty({ example: 'John', description: 'User first name' })
+  @ApiProperty({ example: 'John Doe', description: 'User full name' })
   @IsString()
   @IsNotEmpty()
-  firstName: string;
-
-  @ApiProperty({ example: 'Doe', description: 'User last name' })
-  @IsString()
-  @IsNotEmpty()
-  lastName: string;
-
-  @ApiProperty({ example: 'strongPassword123', description: 'User password (minimum 6 characters)' })
-  @IsString()
-  @MinLength(6)
-  password: string;
+  fullName: string;
 
   @ApiProperty({ example: '+1234567890', description: 'User phone number', required: false })
   @IsOptional()
   @IsPhoneNumber()
-  phone?: string;
+  phoneNumber?: string;
+
+  @ApiProperty({ example: 'https://example.com/photo.jpg', description: 'Profile photo URL', required: false })
+  @IsOptional()
+  @IsString()
+  profilePhotoUrl?: string;
+
+  @ApiProperty({ example: 'Software developer with 5 years of experience', description: 'User bio', required: false })
+  @IsOptional()
+  @IsString()
+  bio?: string;
 }
 
 export class UpdateUserDto {
@@ -34,30 +34,23 @@ export class UpdateUserDto {
   @IsOptional()
   email?: string;
 
-  @ApiProperty({ example: 'John', description: 'User first name', required: false })
+  @ApiProperty({ example: 'John Doe', description: 'User full name', required: false })
   @IsString()
   @IsOptional()
-  firstName?: string;
-
-  @ApiProperty({ example: 'Doe', description: 'User last name', required: false })
-  @IsString()
-  @IsOptional()
-  lastName?: string;
+  fullName?: string;
 
   @ApiProperty({ example: '+1234567890', description: 'User phone number', required: false })
   @IsOptional()
   @IsPhoneNumber()
-  phone?: string;
-}
+  phoneNumber?: string;
 
-export class ChangePasswordDto {
-  @ApiProperty({ example: 'currentPassword123', description: 'Current password' })
+  @ApiProperty({ example: 'https://example.com/photo.jpg', description: 'Profile photo URL', required: false })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  currentPassword: string;
+  profilePhotoUrl?: string;
 
-  @ApiProperty({ example: 'newPassword123', description: 'New password (minimum 6 characters)' })
+  @ApiProperty({ example: 'Software developer with 5 years of experience', description: 'User bio', required: false })
+  @IsOptional()
   @IsString()
-  @MinLength(6)
-  newPassword: string;
+  bio?: string;
 }
